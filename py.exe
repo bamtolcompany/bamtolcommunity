@@ -1,0 +1,9 @@
+print("hello")
+name = "bamtol"
+lang = "파이썬"
+print(f"안녕하세요 {name}입니다. {lang}공부하고 있습니다")
+print("원래는 html,css,자바스크립트로 웹개발만 했는데 파이썬도 해보고 있습니다")
+print("웹사이트 바로가기")
+print("올인원 뉴스")
+print("올인원 검색")
+print("올인원 쇼핑")
