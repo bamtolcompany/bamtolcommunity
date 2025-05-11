@@ -1,9 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
- <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 텍스트 응답</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-<a href="https://bamtolcompany.github.io/python/main.py">국회의원 정당별 분류표</a>
-    </body>
-    </html>
+    <h1>AI 텍스트 응답 시스템</h1>
+    <form method="POST">
+        <input type="text" name="user_input" placeholder="텍스트를 입력하세요" value="{{ user_input }}" required>
+        <button type="submit">입력</button>
+    </form>
+
+    {% if ai_response %}
+    <h2>AI 응답: {{ ai_response }}</h2>
+    {% endif %}
+</body>
+</html>
