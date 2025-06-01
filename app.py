@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 from jinja2 import DictLoader
+with app.app_context():
+    db.create_all()
 
 # --- 템플릿 문자열 정의 ---
 base_html_template = """
