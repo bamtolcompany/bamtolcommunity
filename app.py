@@ -1,3 +1,4 @@
+
 from flask import Flask, request, redirect, url_for, session, abort, render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -142,7 +143,7 @@ base_html_template = """
 </body>
 </html>
 """
-app.jinja_loader = template_loader
+
 index_page_template = """
 {% extends "base.html" %}
 {% block title %}게시판 - {{ super() }}{% endblock %}
@@ -305,7 +306,7 @@ edit_comment_page_template = """
 {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
 {% endblock %}
 """
-app.jinja_loader = template_loader
+
 # --- Flask 앱 설정 ---
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -555,3 +556,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
