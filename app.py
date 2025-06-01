@@ -142,7 +142,7 @@ base_html_template = """
 </body>
 </html>
 """
-
+app.jinja_loader = template_loader
 index_page_template = """
 {% extends "base.html" %}
 {% block title %}게시판 - {{ super() }}{% endblock %}
@@ -305,7 +305,7 @@ edit_comment_page_template = """
 {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
 {% endblock %}
 """
-
+app.jinja_loader = template_loader
 # --- Flask 앱 설정 ---
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
