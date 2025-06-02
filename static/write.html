@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>글쓰기 - 밤톨 커뮤니티</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">글쓰기</h1>
+      <input id="title" class="input mb-3" placeholder="제목" />
+      <textarea id="content" class="textarea mb-3" placeholder="내용"></textarea>
+      <input type="file" id="image" class="mb-3">
+      <button class="button is-primary" onclick="submitPost()">등록</button>
+    </div>
+  </section>
+
+  <script>
+    const userId = localStorage.getItem("user_id");
+    if (!userId) location.href = "/";
+
+    function submitPost() {
+      const formData = new FormData();
+      formData.append("user_id", userId);
+      formData.append("title", document.getElementById("title").value);
+      formData.append("content", document.getElementById("content").value);
+      const img = document.getElementById("image").files[0];
+      if (img) formData.append("image", img);
+
+      fetch("/posts", {
+        method: "POST",
+        body: formData
+      }).then(res => res.json()).then(data => {
+        alert(data.message);
+        location.href = "/";
+      });
+    }
+  </script>
+</body>
+</html>
