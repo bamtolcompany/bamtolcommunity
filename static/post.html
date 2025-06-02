@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>글 상세보기</title>
+<style>
+  body, html { margin:0; padding:0; height:100%; font-family: 'Noto Sans KR', sans-serif; }
+  .container { max-width: 900px; margin: auto; padding: 20px; box-sizing: border-box; }
+  h1 { margin-bottom: 10px; }
+  p { white-space: pre-wrap; }
+  img { max-width: 100%; margin: 10px 0; }
+  button { padding: 8px 12px; margin-right: 8px; border: none; background:#333; color: #fff; cursor: pointer; }
+  button:hover { background:#555; }
+  #comments { margin-top: 30px; }
+  #comments ul { list-style:none; padding:0; }
+  #comments li { border-bottom: 1px solid #eee; padding: 6px 0; }
+  form { margin-top: 20px; }
+  input, textarea { width: 100%; padding: 8px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 0; outline:none; }
+  textarea { resize: vertical; }
+  .like-count { font-weight: bold; margin-left: 5px; }
+  a { color: #333; text-decoration:none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html">← 글 목록으로 돌아가기</a>
+    <h1 id="postTitle">불러오는 중...</h1>
+    <p id="postContent"></p>
+    <img id="postImage" src="" alt="" style="display:none;" />
+    <div>
+      <button id="likeBtn">좋아요</button><span class="like-count" id="likeCount">0</span>
+      <button id="reportBtn">신고</button>
+    </div>
+
+    <section id="comments">
+      <h2>댓글</h2>
+      <ul id="commentsList"><li>불러오는 중...</li></ul>
+
+      <form id="commentForm">
+        <input type="number" id="commentUserId" placeholder="유저ID 입력 (예: 1)" required />
+        <textarea id="commentText" rows="3" placeholder="댓글 내용을 입력하세요." required></textarea>
+        <button type="submit">댓글 작성</button>
+      </form>
+    </section>
+  </div>
+
+<script>
+  const postId = new URLSearchParams(window.location.search).get("post_id");
+  const postTitle = document.getElementById("postTitle");
+  const postContent = document.getElementById("postContent");
+  const postImage = document.getElementById("postImage");
+  const likeBtn = document.getElementById("likeBtn");
+  const likeCountSpan = document.getElementById("likeCount");
+  const reportBtn = document.getElementById("reportBtn");
+  const commentsList = document.getElementById("commentsList");
+  const commentForm = document.getElementById("commentForm");
+  const commentUserIdInput = document.getElementById("commentUserId");
+  const commentTextInput = document.getElementById("commentText");
+
+  async function loadPost() {
+    try {
+      const res = await fetch("/posts");
+      const posts = await res.json();
+      const post = posts.find(p => p.id === Number(postId));
+      if(!post) {
+        postTitle.textContent = "글을 찾을 수 없습니다.";
+        postContent.textContent = "";
+        return;
+      }
+      // 제목 = content 첫 줄, 내용 = 나머지
+      const lines = post.content.split("\n");
+      postTitle.textContent = lines[0] || "(제목 없음)";
+      postContent.textContent = lines.slice(1).join("\n") || "(내용 없음)";
+      if(post.image) {
+        postImage.src = "/uploads/" + post.image;
+        postImage.style.display = "block";
+      } else {
+        postImage.style.display = "none";
+      }
+      likeCountSpan.textContent = post.likes || 0;
+    } catch {
+      postTitle.textContent = "글 불러오기 실패";
+      postContent.textContent = "";
+    }
+  }
+
+  async function loadComments() {
+    commentsList.innerHTML = "<li>불러오는 중...</li>";
+    try {
+      const res = await fetch(`/comments/${postId}`);
+      const comments = await res.json();
+      if(comments.length === 0) {
+        commentsList.innerHTML = "<li>댓글이 없습니다.</li>";
+        return;
+      }
+      commentsList.innerHTML = "";
+      comments.forEach(c => {
+        const li = document.createElement("li");
+        li.textContent = `${c.author}: ${c.text}`;
+        commentsList.appendChild(li);
+      });
+    } catch {
+      commentsList.innerHTML = "<li>댓글 불러오기 실패</li>";
+    }
+  }
+
+  likeBtn.onclick = async () => {
+    const user_id = prompt("좋아요 누를 유저 ID를 입력하세요.");
+    if(!user_id) return alert("유저 ID가 필요합니다.");
+    try {
+      const res = await fetch(`/posts/${postId}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: Number(user_id) })
+      });
+      const data = await res.json();
+      alert(data.message);
+      loadPost();
+    } catch {
+      alert("좋아요 처리 실패");
+    }
+  };
+
+  reportBtn.onclick = async () => {
+    const user_id = prompt("신고할 유저 ID를 입력하세요.");
+    if(!user_id) return alert("유저 ID가 필요합니다.");
+    const reason = prompt("신고 사유를 입력하세요.");
+    if(!reason) return alert("신고 사유가 필요합니다.");
+    try {
+      const res = await fetch(`/posts/${postId}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: Number(user_id), reason })
+      });
+      const data = await res.json();
+      alert(data.message);
+    } catch {
+      alert("신고 처리 실패");
+    }
+  };
+
+  commentForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const user_id = commentUserIdInput.value.trim();
+    const text = commentTextInput.value.trim();
+    if(!user_id || !text) {
+      alert("모든 필드를 채워주세요.");
+      return;
+    }
+    try {
+      const res = await fetch(`/comments/${postId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: Number(user_id), text })
+      });
+      const data = await res.json();
+      alert(data.message);
+      commentForm.reset();
+      loadComments();
+    } catch {
+      alert("댓글 작성 실패");
+    }
+  };
+
+  loadPost();
+  loadComments();
+</script>
+</body>
+</html>
