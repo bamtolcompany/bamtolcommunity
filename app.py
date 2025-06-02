@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 import os, sqlite3
 from datetime import datetime
 
-app = Flask(__name__, static_folder='static', static_url_path='/templetes')
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
