@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directoryMore actions
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os, sqlite3
