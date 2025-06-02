@@ -19,6 +19,7 @@ def init_db():
         c.execute("CREATE TABLE IF NOT EXISTS comments (id INTEGER PRIMARY KEY, post_id INTEGER, user_id INTEGER, text TEXT, created TEXT)")
         c.execute("CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY, post_id INTEGER, user_id INTEGER)")
         c.execute("CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY, post_id INTEGER, user_id INTEGER, reason TEXT)")
+        c.execute("CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, user_id INTEGER, title TEXT, content TEXT, image TEXT, created TEXT)")
         conn.commit()
 
 @app.route('/')
