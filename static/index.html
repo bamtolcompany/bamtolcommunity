@@ -2,334 +2,444 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<title>커뮤니티 앱</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>커뮤니티 앱 - 새 UI</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-  body {
-    max-width: 700px;
-    margin: 30px auto;
-    font-family: 'Roboto', sans-serif;
-    background: #f4f6f8;
-    color: #333;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #222;
-  }
-
-  #auth, #app {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-    padding: 20px 25px;
-    margin-bottom: 30px;
-  }
-
-  input, textarea {
-    width: 100%;
-    padding: 12px 15px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-bottom: 15px;
-    font-size: 14px;
+  /* Reset & 기본 */
+  * {
     box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* 레이아웃: 좌측 사이드바, 중앙 게시글, 우측 글쓰기+댓글 */
+  #sidebar {
+    width: 280px;
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+  }
+  #sidebar h2 {
+    margin: 0 0 10px;
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+  #sidebar input, #sidebar button {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+  }
+  #sidebar input {
+    border: 1.5px solid #475569;
+    background: #334155;
+    color: #e2e8f0;
     transition: border-color 0.3s;
   }
-  input:focus, textarea:focus {
-    border-color: #5b9ef8;
+  #sidebar input:focus {
     outline: none;
+    border-color: #3b82f6;
+    background: #1e293b;
   }
-
-  button {
-    background: #5b9ef8;
+  #sidebar button {
+    background: #3b82f6;
     color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.25s;
+    border: none;
+    transition: background-color 0.25s ease;
   }
-  button:hover {
-    background: #477fdb;
-  }
-  button.secondary {
-    background: #eee;
-    color: #555;
-  }
-  button.secondary:hover {
-    background: #ddd;
+  #sidebar button:hover {
+    background: #2563eb;
   }
 
-  .post {
+  #main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  #header {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1e293b;
+  }
+
+  #posts-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 18px;
+  }
+
+  .post-card {
     background: white;
     border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgb(0 0 0 / 0.05);
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.05);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+    cursor: pointer;
   }
-
+  .post-card:hover {
+    box-shadow: 0 8px 20px rgb(0 0 0 / 0.1);
+  }
   .post-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-
-  .avatar {
-    width: 40px;
-    height: 40px;
-    background: #5b9ef8;
-    border-radius: 50%;
-    color: white;
     font-weight: 700;
-    font-size: 18px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 12px;
-    user-select: none;
-  }
-
-  .post-author {
-    font-weight: 600;
-    font-size: 16px;
+    font-size: 1.1rem;
+    color: #2563eb;
+    margin-bottom: 6px;
   }
   .post-date {
-    margin-left: auto;
-    font-size: 13px;
-    color: #777;
-  }
-
-  .post-content {
-    white-space: pre-wrap;
-    font-size: 15px;
-    margin-bottom: 12px;
-  }
-
-  .post img {
-    max-width: 100%;
-    border-radius: 10px;
-    margin-bottom: 12px;
-  }
-
-  .post-actions {
-    display: flex;
-    gap: 15px;
-  }
-  .post-actions button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #555;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px 8px;
-    border-radius: 6px;
-    transition: background 0.2s, color 0.2s;
-  }
-  .post-actions button:hover {
-    background: #5b9ef8;
-    color: white;
-  }
-  .post-actions button svg {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-  }
-
-  .comments {
-    margin-top: 15px;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-  }
-  .comment {
-    background: #f9fafc;
-    border-radius: 8px;
-    padding: 12px 15px;
+    font-size: 0.8rem;
+    color: #64748b;
     margin-bottom: 10px;
   }
-  .comment b {
+  .post-content {
+    flex-grow: 1;
+    font-size: 1rem;
+    line-height: 1.3;
+    color: #334155;
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .post-image {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    object-fit: cover;
+    max-height: 160px;
+  }
+  .post-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .post-actions button {
+    flex-grow: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 6px;
+    background: #e0e7ff;
+    color: #4338ca;
     font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .post-actions button:hover {
+    background: #c7d2fe;
+  }
+
+  #right-panel {
+    width: 320px;
+    background: white;
+    border-left: 1.5px solid #e2e8f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+  }
+
+  #post-editor textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 120px;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1.5px solid #94a3b8;
+    font-family: inherit;
+  }
+  #post-editor input[type="file"] {
+    margin-top: 10px;
+  }
+  #post-editor button {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #2563eb;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #post-editor button:hover {
+    background-color: #1d4ed8;
+  }
+
+  #comments-section {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+  #comments-section h3 {
+    margin: 0 0 10px;
+    color: #334155;
+  }
+  .comment {
+    background: #f1f5f9;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: #475569;
+  }
+  .comment b {
+    color: #1e293b;
+    margin-bottom: 6px;
+    display: block;
   }
   .comment-date {
-    font-size: 11px;
-    color: #888;
-    margin-left: 6px;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 6px;
   }
 
-  .comment-input {
-    margin-top: 10px;
+  #comment-input {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
   }
-  .comment-input textarea {
-    flex-grow: 1;
+  #comment-input textarea {
     resize: vertical;
-    min-height: 40px;
-    font-size: 14px;
+    min-height: 70px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1.5px solid #94a3b8;
+    font-family: inherit;
+    font-size: 0.95rem;
   }
-  .comment-input button {
-    padding: 10px 15px;
+  #comment-input button {
+    align-self: flex-end;
+    background: #2563eb;
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #comment-input button:hover {
+    background: #1d4ed8;
   }
 
-  /* Hide default file input and style label */
-  #post-image {
-    display: none;
-  }
-  label[for="post-image"] {
-    display: inline-block;
-    padding: 10px 15px;
-    background: #eee;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-bottom: 15px;
-    font-size: 14px;
-    color: #555;
-  }
-  label[for="post-image"]:hover {
-    background: #ddd;
+  /* 모바일 대응 */
+  @media (max-width: 900px) {
+    body {
+      flex-direction: column;
+      height: auto;
+    }
+    #sidebar, #right-panel {
+      width: 100%;
+      height: auto;
+      border-left: none;
+      border-top: 1.5px solid #e2e8f0;
+      padding: 12px 16px;
+    }
+    #main {
+      padding: 12px 16px;
+    }
+    #posts-list {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
   }
 </style>
 </head>
 <body>
 
-<h1>커뮤니티 앱</h1>
+<div id="sidebar">
+  <h2>커뮤니티</h2>
 
-<div id="auth">
-  <h3>회원가입</h3>
-  <input id="reg-username" placeholder="사용자 이름" autocomplete="off" />
-  <input id="reg-password" placeholder="비밀번호" type="password" autocomplete="off" />
-  <button onclick="register()">회원가입</button>
+  <div id="auth-section">
+    <h3>회원가입</h3>
+    <input id="reg-username" placeholder="사용자 이름" />
+    <input id="reg-password" placeholder="비밀번호" type="password" />
+    <button onclick="register()">회원가입</button>
 
-  <hr style="margin: 25px 0;" />
+    <hr style="border: 0.5px solid #475569; margin: 20px 0;" />
 
-  <h3>로그인</h3>
-  <input id="login-username" placeholder="사용자 이름" autocomplete="off" />
-  <input id="login-password" placeholder="비밀번호" type="password" autocomplete="off" />
-  <button onclick="login()">로그인</button>
+    <h3>로그인</h3>
+    <input id="login-username" placeholder="사용자 이름" />
+    <input id="login-password" placeholder="비밀번호" type="password" />
+    <button onclick="login()">로그인</button>
+  </div>
+
+  <div id="user-info" class="hidden">
+    <p>안녕하세요, <b id="user-name"></b>님!</p>
+    <button onclick="logout()" style="background:#ef4444;">로그아웃</button>
+  </div>
 </div>
 
-<div id="app" class="hidden">
-  <button class="secondary" onclick="logout()">로그아웃</button>
+<div id="main">
+  <div id="header">게시글 목록</div>
+  <div id="posts-list">
+    <!-- 게시글 카드가 여기에 동적으로 추가됨 -->
+  </div>
+</div>
 
-  <h3>글쓰기</h3>
-  <textarea id="post-content" placeholder="내용을 입력하세요..." rows="3"></textarea>
-  <label for="post-image">이미지 첨부하기</label>
-  <input type="file" id="post-image" accept="image/*" />
-  <button onclick="writePost()">글 작성</button>
+<div id="right-panel" class="hidden">
+  <div id="post-editor">
+    <h3>글쓰기</h3>
+    <textarea id="post-content" placeholder="내용을 입력하세요..."></textarea>
+    <input type="file" id="post-image" accept="image/*" />
+    <button onclick="writePost()">작성하기</button>
+  </div>
 
-  <h3 style="margin-top:40px;">게시글 목록</h3>
-  <div id="posts"></div>
+  <div id="comments-section">
+    <h3>댓글</h3>
+    <div id="comments-list"></div>
+
+    <div id="comment-input">
+      <textarea id="comment-text" placeholder="댓글을 입력하세요..."></textarea>
+      <button onclick="writeComment()">댓글 작성</button>
+    </div>
+  </div>
 </div>
 
 <script>
 let currentUser = null;
+let selectedPostId = null;
 
 function showMessage(msg) {
   alert(msg);
 }
 
-function getInitials(name) {
-  const parts = name.trim().split(' ');
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
+function toggleAuthUI(isLoggedIn) {
+  document.getElementById('auth-section').classList.toggle('hidden', isLoggedIn);
+  document.getElementById('user-info').classList.toggle('hidden', !isLoggedIn);
+  document.getElementById('right-panel').classList.toggle('hidden', !isLoggedIn);
+  if (isLoggedIn) {
+    document.getElementById('user-name').textContent = currentUser.username;
+  } else {
+    clearRightPanel();
+  }
+}
+
+function clearRightPanel() {
+  document.getElementById('post-content').value = '';
+  document.getElementById('post-image').value = '';
+  document.getElementById('comments-list').innerHTML = '';
+  document.getElementById('comment-text').value = '';
+  selectedPostId = null;
 }
 
 function register() {
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value.trim();
+  if (!username || !password) return showMessage('회원가입 정보를 입력하세요');
+
   fetch('/register', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      username: document.getElementById('reg-username').value.trim(),
-      password: document.getElementById('reg-password').value
-    })
-  }).then(res => res.json()).then(data => showMessage(data.message));
+    body: JSON.stringify({username, password})
+  }).then(res => res.json())
+    .then(data => showMessage(data.message));
 }
 
 function login() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+  if (!username || !password) return showMessage('로그인 정보를 입력하세요');
+
   fetch('/login', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      username: document.getElementById('login-username').value.trim(),
-      password: document.getElementById('login-password').value
-    })
+    body: JSON.stringify({username, password})
   }).then(res => {
-    if(res.status === 200) return res.json();
+    if (res.status === 200) return res.json();
     else throw new Error('로그인 실패');
   }).then(data => {
-    currentUser = { id: data.user_id, username: document.getElementById('login-username').value.trim() };
-    document.getElementById('auth').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
+    currentUser = { id: data.user_id, username };
+    toggleAuthUI(true);
     loadPosts();
-  }).catch(e => alert(e.message));
+  }).catch(e => showMessage(e.message));
 }
 
 function logout() {
   currentUser = null;
-  document.getElementById('auth').classList.remove('hidden');
-  document.getElementById('app').classList.add('hidden');
+  toggleAuthUI(false);
+  clearRightPanel();
+  document.getElementById('posts-list').innerHTML = '';
 }
 
 function loadPosts() {
   fetch('/posts').then(res => res.json()).then(posts => {
-    const postsDiv = document.getElementById('posts');
-    postsDiv.innerHTML = '';
+    const container = document.getElementById('posts-list');
+    container.innerHTML = '';
     posts.forEach(post => {
-      const postDiv = document.createElement('div');
-      postDiv.className = 'post';
-
-      const initials = getInitials(post.author);
-
-      postDiv.innerHTML = `
-        <div class="post-header">
-          <div class="avatar">${initials}</div>
-          <div class="post-author">${post.author}</div>
-          <div class="post-date">${new Date(post.created).toLocaleString()}</div>
-        </div>
-        <div class="post-content">${post.content.replace(/\n/g, '<br>')}</div>
-        ${post.image ? `<img src="/uploads/${post.image}" alt="post image" />` : ''}
+      const postCard = document.createElement('div');
+      postCard.className = 'post-card';
+      postCard.innerHTML = `
+        <div class="post-header">${post.author}</div>
+        <div class="post-date">${new Date(post.created).toLocaleString()}</div>
+        <div class="post-content">${post.content}</div>
+        ${post.image ? `<img src="/uploads/${post.image}" class="post-image" alt="게시글 이미지" />` : ''}
         <div class="post-actions">
-          <button onclick="toggleLike(${post.id})">
-            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3
-            7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22
-            8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            좋아요 (${post.likes})
-          </button>
-          <button onclick="toggleComments(${post.id})">
-            <svg viewBox="0 0 24 24"><path d="M20 17.17V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2
-            2v12.17l4-4 4 4 4-4 4 4z"/></svg>
-            댓글 보기
-          </button>
-          <button onclick="reportPost(${post.id})">
-            <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zM12
-            16v-4M12 20h.01"/></svg>
-            신고
-          </button>
-        </div>
-        <div class="comments hidden" id="comments-${post.id}">
-          <div class="comments-list"></div>
-          <div class="comment-input">
-            <textarea id="comment-text-${post.id}" placeholder="댓글 입력..."></textarea>
-            <button onclick="writeComment(${post.id})">작성</button>
-          </div>
+          <button onclick="toggleLike(event, ${post.id})">좋아요 (${post.likes})</button>
+          <button onclick="selectPost(event, ${post.id})">댓글 보기</button>
+          <button onclick="reportPost(event, ${post.id})" style="background:#f87171; color:white;">신고</button>
         </div>
       `;
-
-      postsDiv.appendChild(postDiv);
+      container.appendChild(postCard);
     });
   });
 }
 
-function writePost() {
-  if (!currentUser) return alert('로그인 먼저 해주세요');
-  const content = document.getElementById('post-content').value.trim();
-  if(!content) return alert('내용을 입력하세요.');
-  const imageFile = document.getElementById('post-image').files[0];
+function selectPost(event, postId) {
+  event.stopPropagation();
+  selectedPostId = postId;
+  loadComments(postId);
+}
 
+function loadComments(postId) {
+  fetch(`/comments/${postId}`)
+    .then(res => res.json())
+    .then(comments => {
+      const commentsList = document.getElementById('comments-list');
+      commentsList.innerHTML = '';
+      comments.forEach(c => {
+        const cDiv = document.createElement('div');
+        cDiv.className = 'comment';
+        cDiv.innerHTML = `
+          <b>${c.author}</b>
+          <div class="comment-date">${new Date(c.created).toLocaleString()}</div>
+          <div>${c.text}</div>
+        `;
+        commentsList.appendChild(cDiv);
+      });
+    });
+}
+
+function writePost() {
+  if (!currentUser) return showMessage('로그인 먼저 해주세요');
+  const content = document.getElementById('post-content').value.trim();
+  if (!content) return showMessage('글 내용을 입력하세요');
+
+  const imageFile = document.getElementById('post-image').files[0];
   const formData = new FormData();
   formData.append('user_id', currentUser.id);
   formData.append('content', content);
@@ -345,8 +455,9 @@ function writePost() {
     });
 }
 
-function toggleLike(postId) {
-  if (!currentUser) return alert('로그인 먼저 해주세요');
+function toggleLike(event, postId) {
+  event.stopPropagation();
+  if (!currentUser) return showMessage('로그인 먼저 해주세요');
   fetch(`/posts/${postId}/like`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
@@ -358,55 +469,35 @@ function toggleLike(postId) {
     });
 }
 
-function toggleComments(postId) {
-  const commentsDiv = document.getElementById(`comments-${postId}`);
-  if (commentsDiv.classList.contains('hidden')) {
-    fetch(`/comments/${postId}`)
-      .then(res => res.json())
-      .then(comments => {
-        const commentsList = commentsDiv.querySelector('.comments-list');
-        commentsList.innerHTML = '';
-        comments.forEach(c => {
-          const cDiv = document.createElement('div');
-          cDiv.className = 'comment';
-          cDiv.innerHTML = `<b>${c.author}</b><span class="comment-date"> - ${new Date(c.created).toLocaleString()}</span><br>${c.text.replace(/\n/g,'<br>')}`;
-          commentsList.appendChild(cDiv);
-        });
-        commentsDiv.classList.remove('hidden');
-      });
-  } else {
-    commentsDiv.classList.add('hidden');
-  }
-}
+function writeComment() {
+  if (!currentUser) return showMessage('로그인 먼저 해주세요');
+  if (!selectedPostId) return showMessage('댓글을 작성할 게시글을 선택하세요');
 
-function writeComment(postId) {
-  if (!currentUser) return alert('로그인 먼저 해주세요');
-  const textArea = document.getElementById(`comment-text-${postId}`);
-  const text = textArea.value.trim();
-  if (!text) return alert('댓글 내용을 입력하세요');
+  const text = document.getElementById('comment-text').value.trim();
+  if (!text) return showMessage('댓글 내용을 입력하세요');
 
-  fetch(`/comments/${postId}`, {
+  fetch(`/comments/${selectedPostId}`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({user_id: currentUser.id, text: text})
+    body: JSON.stringify({user_id: currentUser.id, text})
   }).then(res => res.json())
     .then(data => {
       showMessage(data.message);
-      textArea.value = '';
-      toggleComments(postId); // 한번 숨기고
-      toggleComments(postId); // 다시 보여줘서 댓글 새로고침
+      document.getElementById('comment-text').value = '';
+      loadComments(selectedPostId);
     });
 }
 
-function reportPost(postId) {
-  if (!currentUser) return alert('로그인 먼저 해주세요');
+function reportPost(event, postId) {
+  event.stopPropagation();
+  if (!currentUser) return showMessage('로그인 먼저 해주세요');
   const reason = prompt('신고 사유를 입력하세요');
   if (!reason) return;
 
   fetch(`/posts/${postId}/report`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({user_id: currentUser.id, reason: reason})
+    body: JSON.stringify({user_id: currentUser.id, reason})
   }).then(res => res.json())
     .then(data => showMessage(data.message));
 }
