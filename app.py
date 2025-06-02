@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directoryMore actions
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os, sqlite3
@@ -15,19 +15,11 @@ def init_db():
     with sqlite3.connect("db.sqlite3") as conn:
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)")
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS posts (
-                id INTEGER PRIMARY KEY,
-                user_id INTEGER,
-                title TEXT,
-                content TEXT,
-                image TEXT,
-                created TEXT
-            )
-        """)
+        c.execute("CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, user_id INTEGER, content TEXT, image TEXT, created TEXT)")
         c.execute("CREATE TABLE IF NOT EXISTS comments (id INTEGER PRIMARY KEY, post_id INTEGER, user_id INTEGER, text TEXT, created TEXT)")
         c.execute("CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY, post_id INTEGER, user_id INTEGER)")
         c.execute("CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY, post_id INTEGER, user_id INTEGER, reason TEXT)")
+        c.execute("CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, user_id INTEGER, title TEXT, content TEXT, image TEXT, created TEXT)")
         conn.commit()
 
 @app.route('/')
@@ -95,9 +87,6 @@ def like_post(post_id):
             conn.execute("INSERT INTO likes (post_id, user_id) VALUES (?, ?)", (post_id, user_id))
             conn.commit()
             return jsonify({"message": "좋아요"})
-            @app.route('/write')
-def write_page():
-    return app.send_static_file('write.html')
 
 @app.route("/comments/<int:post_id>", methods=["GET", "POST"])
 def comments(post_id):
