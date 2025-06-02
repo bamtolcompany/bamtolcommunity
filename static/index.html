@@ -2,52 +2,19 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>밤톨 커뮤니티</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <style>
-    body { padding: 2rem; }
-    .post { margin-bottom: 2rem; }
-    .image-preview { max-width: 300px; margin-top: 0.5rem; }
-    .is-hidden { display: none; }
-  </style>
-</head>
-<body>
-  <section class="section">
-    <div class="container">
-      <h1 class="title">밤톨 커뮤니티</h1>
-
-      <div id="auth-section" class="box">
-        <div id="register-form" class="mb-4">
-          <h2 class="subtitle">회원가입</h2>
-          <input id="reg-username" class="input mb-2" type="text" placeholder="아이디">
-          <input id="reg-password" class="input mb-2" type="password" placeholder="비밀번호">
-          <button class="button is-primary" onclick="register()">가입</button>
-        </div>
-
-        <div id="login-form">
-          <h2 class="subtitle">로그인</h2>
-          <input id="login-username" class="input mb-2" type="text" placeholder="아이디">
-          <input id="login-password" class="input mb-2" type="password" placeholder="비밀번호">
-          <button class="button is-link" onclick="login()">로그인</button>
-        </div>
-      </div>
-
-      <div id="community-section" class="is-hidden">
-        <div class="box">
-          <h2 class="subtitle">글쓰기</h2>
-          <textarea id="post-content" class="textarea mb-2" placeholder="내용 작성..."></textarea>
-          <input type="file" id="post-image" class="file-input mb-2">
-          <button class="button is-success" onclick="createPost()">등록</button>
-        </div>
-
-        <div id="post-list"></div>
-      </div>
-    </div>
-  </section>
-
   <script>
     let currentUserId = null;
+
+    function init() {
+      currentUserId = localStorage.getItem("user_id");
+      if (currentUserId) {
+        document.getElementById("auth").classList.add("is-hidden");
+        document.getElementById("write-btn").classList.remove("is-hidden");
+      }
+      loadPosts();
+    }
 
     function register() {
       fetch("/register", {
@@ -57,103 +24,76 @@
           username: document.getElementById("reg-username").value,
           password: document.getElementById("reg-password").value
         })
-      }).then(res => res.json()).then(alert);
+      }).then(res => res.json()).then(data => {
+        alert(data.message);
+        if (data.message === "가입 완료") {
+          login(true);
+        }
+      });
     }
 
-    function login() {
+    function login(auto = false) {
       fetch("/login", {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: document.getElementById("login-username").value,
-          password: document.getElementById("login-password").value
+          username: auto ? document.getElementById("reg-username").value : document.getElementById("login-username").value,
+          password: auto ? document.getElementById("reg-password").value : document.getElementById("login-password").value
         })
       }).then(res => res.json()).then(data => {
         if (data.user_id) {
-          currentUserId = data.user_id;
-          document.getElementById("auth-section").classList.add("is-hidden");
-          document.getElementById("community-section").classList.remove("is-hidden");
-          loadPosts();
+          localStorage.setItem("user_id", data.user_id);
+          location.reload();
         } else {
           alert(data.message);
         }
       });
     }
 
-    function createPost() {
-      const formData = new FormData();
-      formData.append("user_id", currentUserId);
-      formData.append("content", document.getElementById("post-content").value);
-      const image = document.getElementById("post-image").files[0];
-      if (image) formData.append("image", image);
-
-      fetch("/posts", {
-        method: "POST",
-        body: formData
-      }).then(res => res.json()).then(data => {
-        alert(data.message);
-        loadPosts();
-      });
-    }
-
     function loadPosts() {
       fetch("/posts").then(res => res.json()).then(posts => {
-        const postList = document.getElementById("post-list");
-        postList.innerHTML = "";
+        const list = document.getElementById("post-list");
+        list.innerHTML = "";
         posts.forEach(post => {
           const div = document.createElement("div");
-          div.className = "box post";
+          div.className = "box";
           div.innerHTML = `
-            <strong>${post.author}</strong> <small>${new Date(post.created).toLocaleString()}</small><br/>
-            <p>${post.content}</p>
-            ${post.image ? `<img src="/uploads/${post.image}" class="image-preview">` : ""}
-            <p>❤️ ${post.likes} <button onclick="likePost(${post.id})" class="button is-small is-light">좋아요</button>
-            <button onclick="reportPost(${post.id})" class="button is-small is-danger is-light">신고</button></p>
-            <div>
-              <input type="text" id="comment-${post.id}" class="input is-small" placeholder="댓글 작성">
-              <button onclick="addComment(${post.id})" class="button is-small mt-1">댓글 등록</button>
-              <div id="comments-${post.id}"></div>
-            </div>
+            <a href="post.html?id=${post.id}"><strong>${post.title || "(제목 없음)"}</strong></a>
+            <p>작성자: ${post.author} | 좋아요: ${post.likes}</p>
+            <small>${new Date(post.created).toLocaleString()}</small>
           `;
-          postList.appendChild(div);
-          loadComments(post.id);
+          list.appendChild(div);
         });
       });
     }
 
-    function likePost(postId) {
-      fetch(`/posts/${postId}/like`, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: currentUserId })
-      }).then(res => res.json()).then(() => loadPosts());
-    }
-
-    function reportPost(postId) {
-      const reason = prompt("신고 사유를 입력해주세요:");
-      if (!reason) return;
-      fetch(`/posts/${postId}/report`, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: currentUserId, reason })
-      }).then(res => res.json()).then(alert);
-    }
-
-    function addComment(postId) {
-      const text = document.getElementById(`comment-${postId}`).value;
-      fetch(`/comments/${postId}`, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: currentUserId, text })
-      }).then(res => res.json()).then(() => loadComments(postId));
-    }
-
-    function loadComments(postId) {
-      fetch(`/comments/${postId}`).then(res => res.json()).then(comments => {
-        const container = document.getElementById(`comments-${postId}`);
-        container.innerHTML = comments.map(c => `<p><small><strong>${c.author}</strong>: ${c.text}</small></p>`).join('');
-      });
-    }
+    window.onload = init;
   </script>
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">밤톨 커뮤니티</h1>
+
+      <div id="auth">
+        <div class="box">
+          <h2>회원가입</h2>
+          <input id="reg-username" class="input mb-2" placeholder="아이디">
+          <input id="reg-password" class="input mb-2" type="password" placeholder="비밀번호">
+          <button class="button is-primary" onclick="register()">가입</button>
+        </div>
+        <div class="box">
+          <h2>로그인</h2>
+          <input id="login-username" class="input mb-2" placeholder="아이디">
+          <input id="login-password" class="input mb-2" type="password" placeholder="비밀번호">
+          <button class="button is-link" onclick="login()">로그인</button>
+        </div>
+      </div>
+
+      <button id="write-btn" class="button is-success is-hidden" onclick="location.href='write.html'">글쓰기</button>
+      <hr>
+      <div id="post-list"></div>
+    </div>
+  </section>
 </body>
 </html>
