@@ -5,457 +5,349 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>심플 커뮤니티</title>
 <style>
-  /* Reset & 기본 스타일 */
+  /* Reset */
   * {
-    box-sizing: border-box;
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+  html, body {
+    height: 100%;
+    background: #fff;
+    color: #222;
   }
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f9f9f9;
-    color: #333;
-    margin: 0; padding: 0;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    min-height: 100vh;
   }
-  main {
-    max-width: 600px;
-    width: 100%;
-    padding: 20px;
-  }
-  h1 {
-    text-align: center;
+
+  header {
+    padding: 1rem 2rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #ddd;
+    background: #fafafa;
   }
+
+  main {
+    flex: 1;
+    padding: 1rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
   button {
     cursor: pointer;
     border: none;
-    background: #4a90e2;
+    background: #222;
     color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
     font-weight: 600;
-    transition: background 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 0;
+    transition: background 0.25s ease;
   }
-  button:hover:not(:disabled) {
-    background: #357abd;
+  button:hover {
+    background: #555;
   }
-  button:disabled {
-    background: #a0a0a0;
-    cursor: default;
-  }
+
   input, textarea {
-    width: 100%;
-    padding: 0.6rem;
-    margin-top: 0.3rem;
-    margin-bottom: 1rem;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 0.5rem;
+    width: 100%;
     font-size: 1rem;
+    color: #222;
     resize: vertical;
   }
-  textarea {
-    min-height: 60px;
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: #666;
   }
+
   label {
     font-weight: 600;
+    display: block;
+    margin: 0.75rem 0 0.25rem;
   }
-  /* 로그인/회원가입 박스 */
-  #authBox {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 0 12px rgb(0 0 0 / 0.05);
+
+  .hidden {
+    display: none;
   }
-  #authBox > * + * {
+
+  /* 회원가입, 로그인 영역 */
+  #auth-container {
+    max-width: 400px;
+    margin: 2rem auto;
+  }
+  #auth-container > * + * {
     margin-top: 1rem;
-  }
-  #toggleAuth {
-    background: transparent;
-    color: #4a90e2;
-    font-weight: 600;
-    padding: 0;
-    border: none;
-    cursor: pointer;
-    text-decoration: underline;
   }
 
   /* 게시글 리스트 */
-  #posts {
+  #posts-list {
+    list-style: none;
+    padding: 0;
+  }
+  #posts-list > li {
+    border-bottom: 1px solid #eee;
+    padding: 1rem 0;
+  }
+  #posts-list > li:last-child {
+    border-bottom: none;
+  }
+  #posts-list .post-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+  #posts-list .post-author {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+  }
+  #posts-list .post-content {
+    white-space: pre-wrap;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+  #posts-list img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 0.5rem;
+  }
+
+  /* 글 작성 폼 */
+  #new-post-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    border-top: 1px solid #ddd;
+    padding-top: 1rem;
+  }
+
+  /* 꽉찬 화면 */
+  #app-container {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 20px;
   }
-  .post {
-    background: white;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 12px rgb(0 0 0 / 0.05);
-  }
-  .post-header {
-    font-weight: 700;
-    margin-bottom: 5px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    color: #666;
-  }
-  .post-content {
-    white-space: pre-wrap;
-    margin-bottom: 10px;
-    font-size: 1.1rem;
-  }
-  .post-image {
-    max-width: 100%;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    object-fit: contain;
-  }
-  .post-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-size: 0.9rem;
-    color: #444;
-  }
-  .post-actions button {
-    background: none;
-    color: #4a90e2;
-    font-weight: 600;
-    padding: 0;
-    border: none;
-  }
-  .post-actions button.liked {
-    color: #e74c3c;
-  }
-
-  /* 댓글 박스 */
-  .comments {
-    margin-top: 15px;
-    border-top: 1px solid #eee;
-    padding-top: 10px;
-  }
-  .comment {
-    font-size: 0.9rem;
-    padding: 5px 0;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .comment-author {
-    font-weight: 600;
-    color: #555;
-  }
-  .comment-text {
-    white-space: pre-wrap;
-  }
-  #newComment {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-  }
-  #newComment textarea {
-    flex-grow: 1;
-    min-height: 40px;
-  }
-
-  /* 새 게시글 작성 */
-  #newPostForm {
-    background: white;
-    padding: 20px;
-    margin-top: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 0 12px rgb(0 0 0 / 0.05);
-  }
-
-  /* 신고 모달 */
-  #reportModal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    justify-content: center;
-    align-items: center;
-  }
-  #reportModal .modal-content {
-    background: white;
-    padding: 20px;
-    width: 90%;
-    max-width: 400px;
-    border-radius: 8px;
-  }
-  #reportModal textarea {
-    min-height: 80px;
-  }
-  #reportModal .buttons {
-    margin-top: 1rem;
-    text-align: right;
+  #content-area {
+    flex: 1;
   }
 </style>
 </head>
 <body>
-<main>
-  <h1>심플 커뮤니티</h1>
+  <header>밤톨 커뮤니티</header>
 
-  <section id="authBox">
-    <div id="registerForm">
-      <label for="regUsername">회원가입</label>
-      <input type="text" id="regUsername" placeholder="사용자명" />
-      <input type="password" id="regPassword" placeholder="비밀번호" />
-      <button id="registerBtn">가입하기</button>
-      <p>이미 계정이 있나요? <button id="toggleToLogin">로그인</button></p>
-    </div>
-    <div id="loginForm" style="display:none;">
-      <label for="loginUsername">로그인</label>
-      <input type="text" id="loginUsername" placeholder="사용자명" />
-      <input type="password" id="loginPassword" placeholder="비밀번호" />
-      <button id="loginBtn">로그인</button>
-      <p>계정이 없나요? <button id="toggleToRegister">회원가입</button></p>
-    </div>
-  </section>
+  <main id="content-area">
+    <!-- 회원가입/로그인 -->
+    <section id="auth-container">
+      <div>
+        <label for="username">아이디</label>
+        <input type="text" id="username" autocomplete="username" />
+      </div>
+      <div>
+        <label for="password">비밀번호</label>
+        <input type="password" id="password" autocomplete="current-password" />
+      </div>
+      <div style="display:flex; gap: 1rem; margin-top:1rem;">
+        <button id="btn-register">회원가입</button>
+        <button id="btn-login">로그인</button>
+      </div>
+      <div id="auth-message" style="color: red; margin-top: 0.5rem;"></div>
+    </section>
 
-  <section id="newPostForm" style="display:none;">
-    <label for="postContent">새 글 작성</label>
-    <textarea id="postContent" placeholder="내용을 입력하세요"></textarea>
-    <input type="file" id="postImage" accept="image/*" />
-    <button id="submitPost">작성하기</button>
-  </section>
+    <!-- 글 리스트 -->
+    <section id="posts-container" class="hidden">
+      <button id="btn-new-post" style="margin-bottom:1rem;">+ 새 글 작성</button>
+      <ul id="posts-list"></ul>
+    </section>
 
-  <section id="posts"></section>
-</main>
-
-<!-- 신고 모달 -->
-<div id="reportModal">
-  <div class="modal-content">
-    <h3>게시글 신고</h3>
-    <textarea id="reportReason" placeholder="신고 사유를 적어주세요"></textarea>
-    <div class="buttons">
-      <button id="cancelReport">취소</button>
-      <button id="submitReport">신고</button>
-    </div>
-  </div>
-</div>
+    <!-- 새 글 작성 폼 -->
+    <section id="new-post-container" class="hidden">
+      <label for="post-title">글 제목</label>
+      <input type="text" id="post-title" maxlength="100" />
+      <label for="post-content">글 내용</label>
+      <textarea id="post-content" rows="6" maxlength="1000"></textarea>
+      <label for="post-image">이미지 (선택)</label>
+      <input type="file" id="post-image" accept="image/*" />
+      <button id="btn-submit-post" style="margin-top:1rem;">작성 완료</button>
+      <button id="btn-cancel-post" style="margin-top:1rem; background:#999;">취소</button>
+      <div id="post-message" style="color: red; margin-top: 0.5rem;"></div>
+    </section>
+  </main>
 
 <script>
-  let currentUserId = null;
-  let reportTargetPostId = null;
+  let userId = null;
 
-  const $ = selector => document.querySelector(selector);
+  const authContainer = document.getElementById("auth-container");
+  const postsContainer = document.getElementById("posts-container");
+  const newPostContainer = document.getElementById("new-post-container");
 
-  // UI 토글 함수
-  function toggleAuth(showLogin) {
-    $('#loginForm').style.display = showLogin ? 'block' : 'none';
-    $('#registerForm').style.display = showLogin ? 'none' : 'block';
-  }
-  function showNewPostForm(show) {
-    $('#newPostForm').style.display = show ? 'block' : 'none';
-  }
+  const authMessage = document.getElementById("auth-message");
+  const postMessage = document.getElementById("post-message");
 
-  // 이벤트: 로그인 / 회원가입 토글
-  $('#toggleToLogin').onclick = () => toggleAuth(true);
-  $('#toggleToRegister').onclick = () => toggleAuth(false);
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
 
-  // 회원가입
-  $('#registerBtn').onclick = async () => {
-    const username = $('#regUsername').value.trim();
-    const password = $('#regPassword').value.trim();
-    if(!username || !password) return alert('모든 칸을 채워주세요.');
-    const res = await fetch('/register', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({username, password})
-    });
-    const data = await res.json();
-    if(res.ok) {
-      alert(data.message);
-      toggleAuth(true);
-    } else {
-      alert(data.message);
+  const postTitleInput = document.getElementById("post-title");
+  const postContentInput = document.getElementById("post-content");
+  const postImageInput = document.getElementById("post-image");
+
+  const postsList = document.getElementById("posts-list");
+
+  document.getElementById("btn-register").onclick = async () => {
+    authMessage.textContent = "";
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!username || !password) {
+      authMessage.textContent = "아이디와 비밀번호를 모두 입력하세요.";
+      return;
+    }
+    try {
+      const res = await fetch("/register", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({username, password})
+      });
+      const data = await res.json();
+      if(res.ok) {
+        authMessage.style.color = "green";
+        authMessage.textContent = "회원가입 완료. 로그인 해주세요.";
+      } else {
+        authMessage.style.color = "red";
+        authMessage.textContent = data.message || "회원가입 실패";
+      }
+    } catch(e) {
+      authMessage.style.color = "red";
+      authMessage.textContent = "서버 에러";
     }
   };
 
-  // 로그인
-  $('#loginBtn').onclick = async () => {
-    const username = $('#loginUsername').value.trim();
-    const password = $('#loginPassword').value.trim();
-    if(!username || !password) return alert('모든 칸을 채워주세요.');
-    const res = await fetch('/login', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({username, password})
-    });
-    const data = await res.json();
-    if(res.ok) {
-      alert(data.message);
-      currentUserId = data.user_id;
-      $('#authBox').style.display = 'none';
-      showNewPostForm(true);
-      loadPosts();
-    } else {
-      alert(data.message);
+  document.getElementById("btn-login").onclick = async () => {
+    authMessage.textContent = "";
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!username || !password) {
+      authMessage.textContent = "아이디와 비밀번호를 모두 입력하세요.";
+      return;
+    }
+    try {
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({username, password})
+      });
+      const data = await res.json();
+      if(res.ok) {
+        userId = data.user_id;
+        authContainer.classList.add("hidden");
+        postsContainer.classList.remove("hidden");
+        loadPosts();
+      } else {
+        authMessage.style.color = "red";
+        authMessage.textContent = data.message || "로그인 실패";
+      }
+    } catch(e) {
+      authMessage.style.color = "red";
+      authMessage.textContent = "서버 에러";
     }
   };
 
-  // 게시글 불러오기
-  async function loadPosts() {
-    const res = await fetch('/posts');
-    const posts = await res.json();
-    const postsDiv = $('#posts');
-    postsDiv.innerHTML = '';
-    for(const post of posts) {
-      const postEl = document.createElement('article');
-      postEl.className = 'post';
-      postEl.innerHTML = `
-        <div class="post-header">
-          <span>${post.author}</span>
-          <small>${new Date(post.created).toLocaleString()}</small>
-        </div>
-        <div class="post-content">${escapeHtml(post.content)}</div>
-        ${post.image ? `<img src="/uploads/${post.image}" alt="post image" class="post-image" />` : ''}
-        <div class="post-actions">
-          <button data-postid="${post.id}" class="likeBtn">좋아요 ${post.likes}</button>
-          <button data-postid="${post.id}" class="commentToggleBtn">댓글</button>
-          <button data-postid="${post.id}" class="reportBtn">신고</button>
-        </div>
-        <div class="comments" style="display:none;">
-          <div class="commentList"></div>
-          <div id="newComment" class="newComment">
-            <textarea placeholder="댓글을 입력하세요"></textarea>
-            <button class="submitCommentBtn">작성</button>
-          </div>
-        </div>
-      `;
-      postsDiv.appendChild(postEl);
+  document.getElementById("btn-new-post").onclick = () => {
+    postsContainer.classList.add("hidden");
+    newPostContainer.classList.remove("hidden");
+    postTitleInput.value = "";
+    postContentInput.value = "";
+    postImageInput.value = "";
+    postMessage.textContent = "";
+  };
 
-      // 좋아요 버튼 초기화
-      const likeBtn = postEl.querySelector('.likeBtn');
-      likeBtn.onclick = () => toggleLike(post.id, likeBtn);
+  document.getElementById("btn-cancel-post").onclick = () => {
+    newPostContainer.classList.add("hidden");
+    postsContainer.classList.remove("hidden");
+  };
 
-      // 댓글 토글
-      const commentToggleBtn = postEl.querySelector('.commentToggleBtn');
-      const commentsDiv = postEl.querySelector('.comments');
-      commentToggleBtn.onclick = () => {
-        if(commentsDiv.style.display === 'none') {
-          commentsDiv.style.display = 'block';
-          loadComments(post.id, commentsDiv.querySelector('.commentList'));
-        } else {
-          commentsDiv.style.display = 'none';
-        }
-      };
-
-      // 댓글 작성
-      const submitCommentBtn = postEl.querySelector('.submitCommentBtn');
-      const commentTextarea = postEl.querySelector('#newComment textarea');
-      submitCommentBtn.onclick = async () => {
-        const text = commentTextarea.value.trim();
-        if(!text) return alert('댓글 내용을 입력하세요');
-        const res = await fetch(`/comments/${post.id}`, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({user_id: currentUserId, text})
-        });
-        if(res.ok) {
-          commentTextarea.value = '';
-          loadComments(post.id, commentsDiv.querySelector('.commentList'));
-        }
-      };
-
-      // 신고 버튼
-      const reportBtn = postEl.querySelector('.reportBtn');
-      reportBtn.onclick = () => {
-        reportTargetPostId = post.id;
-        $('#reportReason').value = '';
-        $('#reportModal').style.display = 'flex';
-      };
+  document.getElementById("btn-submit-post").onclick = async () => {
+    postMessage.textContent = "";
+    const title = postTitleInput.value.trim();
+    const content = postContentInput.value.trim();
+    if (!title || !content) {
+      postMessage.textContent = "글 제목과 내용을 모두 입력하세요.";
+      return;
     }
-  }
-
-  // 댓글 불러오기
-  async function loadComments(postId, container) {
-    const res = await fetch(`/comments/${postId}`);
-    const comments = await res.json();
-    container.innerHTML = comments.map(c =>
-      `<div class="comment">
-        <div class="comment-author">${escapeHtml(c.author)}</div>
-        <div class="comment-text">${escapeHtml(c.text)}</div>
-        <small>${new Date(c.created).toLocaleString()}</small>
-      </div>`
-    ).join('');
-  }
-
-  // 좋아요 토글
-  async function toggleLike(postId, btn) {
-    if(!currentUserId) return alert('로그인이 필요합니다.');
-    const res = await fetch(`/posts/${postId}/like`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({user_id: currentUserId})
-    });
-    const data = await res.json();
-    if(res.ok) {
-      // 좋아요 수 갱신을 위해 다시 게시글 리스트 로드
-      loadPosts();
-    } else {
-      alert(data.message || '오류 발생');
-    }
-  }
-
-  // 새 글 작성
-  $('#submitPost').onclick = async () => {
-    const content = $('#postContent').value.trim();
-    const imageFile = $('#postImage').files[0];
-    if(!content && !imageFile) return alert('내용이나 이미지를 입력해주세요.');
-
     const formData = new FormData();
-    formData.append('user_id', currentUserId);
-    formData.append('content', content);
-    if(imageFile) formData.append('image', imageFile);
-
-    const res = await fetch('/posts', {
-      method: 'POST',
-      body: formData
-    });
-    if(res.ok) {
-      alert('게시글 작성 완료');
-      $('#postContent').value = '';
-      $('#postImage').value = '';
-      loadPosts();
-    } else {
-      alert('작성 실패');
+    formData.append("user_id", userId);
+    // 글 제목과 내용 분리 안된 서버 코드라서 제목은 내용 앞에 붙임 (제목 + 줄바꿈 + 내용)
+    formData.append("content", title + "\n\n" + content);
+    if(postImageInput.files.length > 0) {
+      formData.append("image", postImageInput.files[0]);
+    }
+    try {
+      const res = await fetch("/posts", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if(res.ok) {
+        newPostContainer.classList.add("hidden");
+        postsContainer.classList.remove("hidden");
+        loadPosts();
+      } else {
+        postMessage.textContent = data.message || "작성 실패";
+      }
+    } catch(e) {
+      postMessage.textContent = "서버 에러";
     }
   };
 
-  // 신고 모달 버튼
-  $('#cancelReport').onclick = () => {
-    $('#reportModal').style.display = 'none';
-    reportTargetPostId = null;
-  };
-  $('#submitReport').onclick = async () => {
-    const reason = $('#reportReason').value.trim();
-    if(!reason) return alert('신고 사유를 입력하세요.');
-    const res = await fetch(`/posts/${reportTargetPostId}/report`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({user_id: currentUserId, reason})
-    });
-    if(res.ok) {
-      alert('신고 완료');
-      $('#reportModal').style.display = 'none';
-      reportTargetPostId = null;
-    } else {
-      alert('신고 실패');
-    }
-  };
+  async function loadPosts() {
+    postsList.innerHTML = "<li>불러오는 중...</li>";
+    try {
+      const res = await fetch("/posts");
+      const posts = await res.json();
+      if(Array.isArray(posts)) {
+        if(posts.length === 0) {
+          postsList.innerHTML = "<li>등록된 글이 없습니다.</li>";
+          return;
+        }
+        postsList.innerHTML = "";
+        for(const post of posts) {
+          // 제목은 content의 첫 줄, 내용은 나머지
+          let lines = post.content.split("\n");
+          let title = lines.shift() || "";
+          let content = lines.join("\n").trim();
+          if(!content) content = "(내용 없음)";
 
-  // HTML escape (XSS 방지)
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div class="post-title">${escapeHtml(title)}</div>
+            <div class="post-author">작성자: ${escapeHtml(post.author)} | 좋아요 ${post.likes} | ${new Date(post.created).toLocaleString()}</div>
+            <div class="post-content">${escapeHtml(content).replace(/\n/g, "<br>")}</div>
+            ${post.image ? `<img src="/uploads/${encodeURIComponent(post.image)}" alt="post image" />` : ""}
+          `;
+          postsList.appendChild(li);
+        }
+      } else {
+        postsList.innerHTML = "<li>데이터 형식 오류</li>";
+      }
+    } catch(e) {
+      postsList.innerHTML = "<li>서버 에러</li>";
+    }
+  }
+
   function escapeHtml(text) {
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+    return text.replace(/[&<>"']/g, m => {
+      switch(m) {
+        case "&": return "&amp;";
+        case "<": return "&lt;";
+        case ">": return "&gt;";
+        case "\"": return "&quot;";
+        case "'": return "&#39;";
+        default: return m;
+      }
+    });
   }
 </script>
 </body>
