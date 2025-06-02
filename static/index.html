@@ -58,7 +58,7 @@
           const div = document.createElement("div");
           div.className = "box";
           div.innerHTML = `
-            <a href="post.html?id=${post.id}"><strong>${post.title || "(제목 없음)"}</strong></a>
+            <a href="/static/post.html?id=${post.id}"><strong>${post.title || "(제목 없음)"}</strong></a>
             <p>작성자: ${post.author} | 좋아요: ${post.likes}</p>
             <small>${new Date(post.created).toLocaleString()}</small>
           `;
